@@ -1,4 +1,5 @@
 from django.shortcuts import render
+#from .models import reviews
 
 reviews = [
     {
@@ -15,9 +16,17 @@ reviews = [
     }
 ]
 
-
 def home(request):
-	context = {
-		'reviews': reviews
-	}
-	return render(request, 'slayer/home.html', context)
+    if (request.method == 'POST'): 
+        url = request.POST.get('url-input', None)
+
+    context = {
+        'reviews': reviews
+    }
+    return render(request, 'slayer/home.html', context)
+
+def yelp(request):
+    context = {
+        'reviews': reviews
+    }
+    return render(request, 'slayer/yelp.html', context)

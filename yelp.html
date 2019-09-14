@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Spam Slayer</title>
+
+	<meta charset="utf-8">
+	<meta name="description" content="Spam Slayer Project">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	
+	  <link rel="stylesheet" type="text/css" href="styles/main.css">
+</head>
+
+<body>
+    <div id="page-title" class="container text-center padded">
+      <h1>Spam Slayer</h1>
+      <p><em>Are you aware that there are tons of fake reviews on the Internet? Spam Slayer helps you filter them all!</em></p>
+    </div>
+
+    <div id="url-bar" class="container">
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link" href="home.html">Amazon</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="yelp.html">Yelp</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">...</a>
+        </li>
+      </ul>
+
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="paste your url">
+        <div class="input-group-append">
+          <button class="btn btn-success" type="submit">Go</button>
+        </div>
+      </div>
+    </div>
+
+    <main role="main" class="container">
+      <div class="row">
+        <div class="col-md-8">
+            <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#real">Real</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#fake">Fake</a>
+              </li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+              <div class="tab-pane container active" id="real">
+                <article class="media content-section">
+                  <div class="media-body">
+                    <div class="article-metadata">
+                      <a class="mr-2" href="#">{{ review.author }}</a>
+                      <small class="text-muted">{{ review.date_posted }}</small>
+                    </div>
+                    <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
+                    <p class="article-content">{{ review.content }}</p>
+                  </div>
+                </article>
+              </div>
+
+              <div class="tab-pane container fade" id="fake">
+                <article class="media content-section">
+                  <div class="media-body">
+                    <div class="article-metadata">
+                      <a class="mr-2" href="#">{{ review.author }}</a>
+                      <small class="text-muted">{{ review.date_posted }}</small>
+                    </div>
+                    <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
+                    <p class="article-content">{{ review.content }}</p>
+                  </div>
+                </article>
+              </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="content-section">
+            <h3>Our Sidebar</h3>
+            <p class='text-muted'>You can put any information here you'd like.
+              <ul class="list-group">
+                <li class="list-group-item list-group-item-light">Latest Posts</li>
+                <li class="list-group-item list-group-item-light">Announcements</li>
+                <li class="list-group-item list-group-item-light">Calendars</li>
+                <li class="list-group-item list-group-item-light">etc</li>
+              </ul>
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>

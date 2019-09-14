@@ -1,19 +1,18 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Spam Slayer</title>
+	<title>Spam Slayer</title>
 
-  <meta charset="utf-8">
-  <meta name="description" content="Spam Slayer Project">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+	<meta charset="utf-8">
+	<meta name="description" content="Spam Slayer Project">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <!-- Add icon library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-  <link rel="stylesheet" type="text/css" href="{% static 'slayer/main.css' %}">
+  <link rel="stylesheet" type="text/css" href="styles/main.css">
 </head>
 
 <body>
@@ -25,26 +24,22 @@
     <div id="url-bar" class="container">
       <ul class="nav nav-tabs">
         <li class="nav-item">
-          <a class="nav-link active" href="{% url 'slayer-home' %}">Amazon</a>
+          <a class="nav-link active" href="home.html">Amazon</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'slayer-yelp' %}">Yelp</a>
+          <a class="nav-link" href="yelp.html">Yelp</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">...</a>
         </li>
       </ul>
 
-      <form method="POST">
-      {% csrf_token %}
-        <div class="input-group mb-3">
-          <input type="text" class="form-control" placeholder="paste your url" name="url-input">
-          <div class="input-group-append">
-            <button class="btn btn-success" type="submit">Go</button>
-          </div>
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="paste your url">
+        <div class="input-group-append">
+          <button class="btn btn-success" type="submit">Go</button>
         </div>
-      </form>
-
+      </div>
     </div>
 
     <main role="main" class="container">
@@ -61,38 +56,37 @@
               <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" href="#fake">Fake</a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#real">Helpful & Real</a>
-              </li>
             </ul>
 
             <article class="media content-section">
                 <!-- Tab panes -->
                 <div class="media-body tab-content">
                   <div class="tab-pane container active" id="real">
-                  {% for review in reviews %}
                     <div class="article-metadata">
                       <a class="mr-2" href="#">{{ review.author }}</a>
                       <small class="text-muted">{{ review.date_posted }}</small>
                     </div>
                     <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
                     <p class="article-content">{{ review.content }}</p>
-                  {% endfor %}
+
+                    <div class="article-metadata">
+                      <a class="mr-2" href="#">{{ review.author }}</a>
+                      <small class="text-muted">{{ review.date_posted }}</small>
+                    </div>
+                    <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
+                    <p class="article-content">{{ review.content }}</p>
                   </div>
 
                   <div class="tab-pane container fade" id="fake">
-                    {% for review in reviews %}
                     <div class="article-metadata">
                       <a class="mr-2" href="#">{{ review.author2 }}</a>
                       <small class="text-muted">{{ review.date_posted }}</small>
                     </div>
                     <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
                     <p class="article-content">{{ review.content }}</p>
-                    {% endfor %}
                   </div>
                 </div>
             </article>
-
         </div>
 
         <div class="col-md-4">
@@ -168,7 +162,7 @@
           <div class="content-section">
             <div class="form-check-inline">
               <label class="form-check-label">
-                <input type="checkbox" class="form-check-input" name="helpfulness" value="">Helpfulness Filter
+                <input type="checkbox" class="form-check-input" value="">Helpfulness Filter
               </label>
             </div>
             <p>Filter out helpless reviews to only show helpful & real reviews</p>
