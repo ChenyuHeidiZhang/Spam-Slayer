@@ -1,0 +1,12 @@
+TRUTHFUL AND DECEPTIVE HOTEL REVIEWS FROM KAGGLE:
+https://www.kaggle.com/rtatman/deceptive-opinion-spam-corpus
+
+YELP DECEPTIVE AND TRUTHFUL REVIEWS (MUST ASK PROFESSOR FOR DATA, WHICH I ALREADY DID):
+http://odds.cs.stonybrook.edu/yelpzip-dataset/
+
+AMAZON DEVEPTIVE AND TRUTHFUL REVIEWS (MUST ASK PROFESSOR FOR DATA, WHICH I ALRAEDY DID):
+http://liu.cs.uic.edu/download/data/
+
+GOLD STANDARD DATA:
+https://github.com/dyq0811/Opinion-Spam-Detection-BiRCNN/tree/master/svm
+
