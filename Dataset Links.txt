@@ -10,3 +10,6 @@ http://liu.cs.uic.edu/download/data/
 GOLD STANDARD DATA:
 https://github.com/dyq0811/Opinion-Spam-Detection-BiRCNN/tree/master/svm
 
+DATASET TO PREDICT HELPFULNESS OF REVIEW:
+http://jmcauley.ucsd.edu/data/amazon/
+
