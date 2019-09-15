@@ -14,6 +14,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <link rel="stylesheet" type="text/css" href="{% static 'slayer/main.css' %}">
+
+  <!-- JAVASCRIPT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <script type="text/javascript" language="Javascript" src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.11.3.min.js"></script> 
 </head>
 
 <body>
@@ -70,26 +74,34 @@
                 <!-- Tab panes -->
                 <div class="media-body tab-content">
                   <div class="tab-pane container active" id="real">
-                  {% for review in reviews_real %}
-                    <div class="article-metadata">
-                      <a class="mr-2" href="#">{{ review.author }}</a>
-                      <small class="text-muted">{{ review.date_posted }}</small>
-                      <a>Rating: {{ review.rating }} out of 5</a>
-                    </div>
-                    <h3><a class="article-title" href="#">{{ review.title }}</a></h3>
-                    <p class="article-content">{{ review.content }}</p>
-                  {% endfor %}
+                    {% for review in reviews_real %}
+                      <div class="article-metadata">
+                        <a class="mr-2" href="#">{{ review.author }}</a>
+                        <small class="text-muted">{{ review.date_posted }}</small>
+                      </div>
+                      <h5 class="article-title">Rating: {{ review.rating }} out of 5</h5>
+                      {% if review.content|length > 300 %}
+                        <p class="article-content"><span id="short">{{ review.content|truncatewords:50 }}</span><span id="dots">...</span><span id="more">{{ review.content }}</span></p>
+                        <button onclick="myFunction()" id="myBtn" style="margin-bottom: 10px">Read more</button>
+                      {% else %}
+                        <p class="article-content">{{ review.content }}</p>
+                      {% endif %}
+                    {% endfor %}
                   </div>
 
                   <div class="tab-pane container fade" id="fake">
                     {% for review in reviews_fake %}
-                    <div class="article-metadata">
-                      <a class="mr-2" href="#">{{ review.author }}</a>
-                      <small class="text-muted">{{ review.date_posted }}</small>
-                      <a>Rating: {{ review.rating }} out of 5</a>
-                    </div>
-                    <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
-                    <p class="article-content">{{ review.content }}</p>
+                      <div class="article-metadata">
+                        <a class="mr-2" href="#">{{ review.author }}</a>
+                        <small class="text-muted">{{ review.date_posted }}</small>
+                      </div>
+                      <h5 class="article-title">Rating: {{ review.rating }} out of 5</h5>
+                      {% if review.content|length > 300 %}
+                        <p class="article-content"><span id="short">{{ review.content|truncatewords:50 }}</span><span id="dots">...</span><span id="more">{{ review.content }}</span></p>
+                        <button onclick="myFunction()" id="myBtn" style="margin-bottom: 10px">Read more</button>
+                      {% else %}
+                        <p class="article-content">{{ review.content }}</p>
+                      {% endif %}
                     {% endfor %}
                   </div>
                 </div>
@@ -100,11 +112,36 @@
         <div class="col-md-4">
           <div class="content-section">
             <h2 class="heading">Adjusted Rating</h2>
-            <span class="fa fa-star checked"></span>
-            <span class="fa fa-star checked"></span>
-            <span class="fa fa-star checked"></span>
-            <span class="fa fa-star checked"></span>
-            <span class="fa fa-star"></span>
+            {% if rating >= 1 %}
+              <span class="fa fa-star checked"></span>
+            {% else %}
+              <span class="fa fa-star"></span>
+            {% endif %}
+
+            {% if rating >= 2 %}
+              <span class="fa fa-star checked"></span>
+            {% else %}
+              <span class="fa fa-star"></span>
+            {% endif %}
+
+            {% if rating >= 3 %}
+              <span class="fa fa-star checked"></span>
+            {% else %}
+              <span class="fa fa-star"></span>
+            {% endif %}
+
+            {% if rating >= 4 %}
+              <span class="fa fa-star checked"></span>
+            {% else %}
+              <span class="fa fa-star"></span>
+            {% endif %}
+
+            {% if rating >= 5 %}
+              <span class="fa fa-star checked"></span>
+            {% else %}
+              <span class="fa fa-star"></span>
+            {% endif %}
+
             <p>{{ rating }} average based on {{ count }} reviews.</p>
             <hr style="border:3px solid #f1f1f1">
 
@@ -114,7 +151,7 @@
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-5" style="width: {{ count5star }} "></div>
+                  <div class="bar-5" style="width: {{ percs.4 }} "></div>
                 </div>
               </div>
               <div class="side right">
@@ -125,7 +162,7 @@
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-4" style="width: {{ count4star }}"></div>
+                  <div class="bar-4" style="width: {{ percs.3 }}"></div>
                 </div>
               </div>
               <div class="side right">
@@ -136,7 +173,7 @@
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-3" style="width: {{ count3star }}"></div>
+                  <div class="bar-3" style="width: {{ percs.2 }}"></div>
                 </div>
               </div>
               <div class="side right">
@@ -147,7 +184,7 @@
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-2" style="width: {{ count3star }}"></div>
+                  <div class="bar-2" style="width: {{ percs.1 }}"></div>
                 </div>
               </div>
               <div class="side right">
@@ -158,7 +195,7 @@
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-1" style="width: {{ count1star }}"></div>
+                  <div class="bar-1" style="width: {{ percs.0 }}"></div>
                 </div>
               </div>
               <div class="side right">
@@ -182,6 +219,27 @@
         </div>
       </div>
     </main>
+
+    <script>
+      function myFunction() {
+        var dots = document.getElementById("dots");
+        var shortText = document.getElementById("short");
+        var moreText = document.getElementById("more");
+        var btnText = document.getElementById("myBtn");
+
+        if (dots.style.display === "none") {
+          dots.style.display = "inline";
+          btnText.innerHTML = "Read more";
+          moreText.style.display = "none";
+          shortText.style.display = "inline";
+        } else {
+          dots.style.display = "none";
+          btnText.innerHTML = "Read less";
+          shortText.style.display = "none";
+          moreText.style.display = "inline";
+        }
+      }
+    </script>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

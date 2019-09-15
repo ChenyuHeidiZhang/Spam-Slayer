@@ -7,6 +7,9 @@ ul {
   margin: 0;
 }
 
+#dots {display: none;}
+#more {display: none;}
+
 #page-title {
   margin-bottom: 30px;
   color: #ffffff;

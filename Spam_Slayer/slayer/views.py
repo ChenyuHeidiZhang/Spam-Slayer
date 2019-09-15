@@ -207,130 +207,6 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
             end_index = min((batch_num + 1) * batch_size, data_size)
             yield shuffled_data[start_index:end_index]
 
-def train():
-    '''Training the model'''
-
-    #Load training data, training labels, validation data, validation labels
-    pickle_file = ROOT+'/Spam-Slayer/Data/Kaggle Amazon Data/data_saved.pickle'
-    with open(pickle_file, 'rb') as f :
-        save = pickle.load(f)
-        train_data = save['train_data']
-        train_labels = save['train_labels']
-        validation_data = save['validation_data']
-        validation_labels = save['validation_labels']
-        del save  # hint to help gc free up memory
-    print('train data shape ', train_data.shape)
-    print('train labels shape ', train_labels.shape)
-    print('validation data shape ', validation_data.shape)
-    print('validation labels shape ', validation_labels.shape)
-
-    with tf.Graph().as_default():
-        sess = tf.Session()
-        with sess.as_default():
-            cnn = SCNN_MODEL(sentence_per_review=SENTENCE_PER_REVIEW, 
-                            words_per_sentence=WORDS_PER_SENTENCE, 
-                            wordVectors=wordsVectors, 
-                            embedding_size=EMBEDDING_DIM, 
-                            filter_widths_sent_conv=FILTER_WIDTHS_SENT_CONV, 
-                            num_filters_sent_conv=NUM_FILTERS_SENT_CONV, 
-                            filter_widths_doc_conv=FILTER_WIDTHS_DOC_CONV, 
-                            num_filters_doc_conv=NUM_FILTERS_DOC_CONV, 
-                            num_classes=NUM_CLASSES, 
-                            l2_reg_lambda=L2_REG_LAMBDA,
-                            training=True)
-            
-            # Define Training procedure
-            global_step = tf.Variable(0, name="global_step", trainable=False)
-            optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
-            grads_and_vars = optimizer.compute_gradients(cnn.loss)
-            train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
-            
-            # Output directory for models and summaries
-            timestamp = str(int(time.time()))
-            out_dir = os.path.abspath(os.path.join(ROOT+"/Spam-Slayer/Data/Kaggle Amazon Data/runs/", timestamp))
-            print("Writing to {}\n".format(out_dir))
-            
-            # Summaries for loss and accuracy
-            loss_summary = tf.summary.scalar("loss", cnn.loss)
-            acc_summary = tf.summary.scalar("accuracy", cnn.accuracy)
-            
-            # Train Summaries
-            train_summary_op = tf.summary.merge([loss_summary, acc_summary])
-            train_summary_dir = os.path.join(out_dir, "summaries", "train")
-            train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
-            
-            # Dev summaries
-            dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
-            dev_summary_dir = os.path.join(out_dir, "summaries", "dev")
-            dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
-            
-            # Checkpoint directory. Tensorflow assumes this directory already exists so we need to create it
-            checkpoint_dir = os.path.abspath(os.path.join(out_dir, "checkpoints"))
-            checkpoint_prefix = os.path.join(checkpoint_dir, "model")
-            if not os.path.exists(checkpoint_dir):
-                os.makedirs(checkpoint_dir)
-            saver = tf.train.Saver(tf.global_variables(), max_to_keep=NUM_CHECKPOINTS)
-            
-            # Initialize all variables
-            sess.run(tf.global_variables_initializer())
-            
-            def train_step(x_batch, y_batch):
-                """
-                A single training step
-                """
-                feed_dict = {
-                    cnn.input_x: x_batch,
-                    cnn.input_y: y_batch,
-                    cnn.input_size: len(y_batch),
-                    cnn.dropout: DROPOUT_KEEP_PROB
-                }
-                _, step, summaries, loss, accuracy = sess.run(
-                    [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
-                    feed_dict)
-                time_str = datetime.datetime.now().isoformat()
-                print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
-                train_summary_writer.add_summary(summaries, step)
-            
-            def dev_step(x_batch, y_batch, writer=None):
-                """
-                Evaluates model on a dev set
-                """
-                feed_dict = {
-                    cnn.input_x: x_batch,
-                    cnn.input_y: y_batch,
-                    cnn.input_size: y_batch.shape[0],
-                    cnn.dropout: 1.0
-                }
-                step, summaries, loss, accuracy = sess.run(
-                    [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
-                    feed_dict)
-                time_str = datetime.datetime.now().isoformat()
-                print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
-                if writer:
-                    writer.add_summary(summaries, step)
-            
-            print('train data shape ', train_data.shape)
-            print('train labels shape ', train_labels.shape)
-            print('validation data shape ', validation_data.shape)
-            print('validation labels shape ', validation_labels.shape)
-            
-            # Generate batches
-            batches = batch_iter(
-                list(zip(train_data, train_labels)), BATCH_SIZE, NUM_EPOCHS)
-            # Training loop. For each batch...
-            for batch in batches:
-                x_batch, y_batch = zip(*batch)
-                train_step(x_batch, y_batch)
-                current_step = tf.train.global_step(sess, global_step)
-                if current_step % EVALUATE_EVERY == 0:
-                    print("\nEvaluation:")
-                    dev_step(validation_data, validation_labels, writer=dev_summary_writer)
-                    print("")
-                if current_step % CHECKPOINT_EVERY == 0:
-                    path = saver.save(sess, checkpoint_prefix, global_step=current_step)
-                    print("Saved model checkpoint to {}\n".format(path))
-
-
 def predict(x_batch):
     '''Making a prediction'''
     with tf.Graph().as_default():
@@ -455,6 +331,34 @@ def real_time_predict(list_of_reviews):
     return prediction;
 
 
+def parse2(url):
+    # Sep 15, 2019, Yingqi Ding, HopHack Fall 2019
+    from tempfile import mkstemp
+    from shutil import move
+    from os import fdopen, remove
+    import os
+    import pandas as pd
+
+    #url = 'https://www.amazon.in/Apple-MacBook-Air-13-3-inch-MQD32HN/product-reviews/B073Q5R6VR/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&pageNumber='
+    # with open('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews.py', 'w') as new_file:
+    #     with open('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews_old.py') as old_file:
+    #         for n, line in enumerate(old_file):
+    #           if n == 15:
+    #             new_file.write(line[:line.index('=')+2] + '"' + url + '&pageNumber=' + '"')
+    #           elif n >= 2:
+    #             new_file.write(line)
+
+    # os.system("scrapy runspider /Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews.py -o /Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/reviews.csv")
+    data = pd.read_csv('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/reviews.csv')
+    rating = []
+    review = []
+    for i in range(len(data['stars'])):
+      if data['stars'][i][:3] != 'sta':
+        rating.append(float(data['stars'][i][:3]))
+        review.append(data['comment'][i])
+
+    return (rating[:100], review[:100])
+
 
 def parse(url):
     #import urllib.request
@@ -478,61 +382,30 @@ def parse(url):
     html = soup.prettify('utf-8')
     product_json = {}
 
-    for divs in soup.findAll('div', attrs={'class': 'a-box-group'}):
-        try:
-            product_json['brand'] = divs['data-brand']
-            break
-        except:
-            pass
-
     for spans in soup.findAll('span', attrs={'id': 'productTitle'}):
         name_of_product = spans.text.strip()
         product_json['name'] = name_of_product
         break
 
-    for divs in soup.findAll('div'):
-        try:
-            price = str(divs['data-asin-price'])
-            product_json['price'] = '$' + price
-            break
-        except:
-            pass
+    # for i_tags in soup.findAll('i',
+    #                            attrs={'data-hook': 'average-star-rating'}):
+    #     for spans in i_tags.findAll('span', attrs={'class': 'a-icon-alt'}):
+    #         product_json['star-rating'] = spans.text.strip()
+    #         break
 
-    for divs in soup.findAll('div', attrs={'id': 'rwImages_hidden'}):
-        for img_tag in divs.findAll('img', attrs={'style': 'display:none;'}):
-            product_json['img-url'] = img_tag['src']
-            break
+    # for spans in soup.findAll('span', attrs={'id': 'acrCustomerReviewText'
+    #                           }):
+    #     if spans.text:
+    #         review_count = spans.text.strip()
+    #         product_json['customer-reviews-count'] = review_count
+    #         break
 
-    for i_tags in soup.findAll('i',
-                               attrs={'data-hook': 'average-star-rating'}):
-        for spans in i_tags.findAll('span', attrs={'class': 'a-icon-alt'}):
-            product_json['star-rating'] = spans.text.strip()
-            break
-
-    for spans in soup.findAll('span', attrs={'id': 'acrCustomerReviewText'
-                              }):
-        if spans.text:
-            review_count = spans.text.strip()
-            product_json['customer-reviews-count'] = review_count
-            break
-
-    product_json['details'] = []
-    for ul_tags in soup.findAll('ul',
-                                attrs={'class': 'a-unordered-list a-vertical a-spacing-none'
-                                }):
-        for li_tags in ul_tags.findAll('li'):
-            for spans in li_tags.findAll('span',
-                    attrs={'class': 'a-list-item'}, text=True,
-                    recursive=False):
-                product_json['details'].append(spans.text.strip())
-
-    product_json['short-reviews'] = []
-    for a_tags in soup.findAll('a',
-                               attrs={'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'
-                               }):
-        short_review = a_tags.text.strip()
-        product_json['short-reviews'].append(short_review)
-
+    # product_json['short-reviews'] = []
+    # for a_tags in soup.findAll('a',
+    #                            attrs={'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'
+    #                            }):
+    #     short_review = a_tags.text.strip()
+    #     product_json['short-reviews'].append(short_review)
 
     product_json['long-reviews'] = []
     for divs in soup.findAll('div', attrs={'data-hook': 'review-collapsed'}):
@@ -540,6 +413,7 @@ def parse(url):
         product_json['long-reviews'].append(long_review)
 
     return product_json
+
 
 
 def home(request):
@@ -555,43 +429,52 @@ def home(request):
     count2star = 0
     count1star = 0
 
+    rate = 0
+
     if (request.method == 'POST'): 
-        #url = request.POST.get('url-input', None)
-        json = {
-            "brand": "Bose",
-            "name": "Bose QuietComfort 35 II Wireless Bluetooth Headphones, Noise-Cancelling, with Alexa voice control, enabled with Bose AR - Silver",
-            "price": "$349.00",
-            "img-url": "https://images-na.ssl-images-amazon.com/images/I/41I0FkzD56L._SY300_QL70_.jpg",
-            "star-rating": "4.4 out of 5 stars",
-            "customer-reviews-count": "3,411 customer reviews",
-            "details": [
-                "3 levels of world class noise cancellation for better listening experience in any environment",
-                "Alexa enabled for voice access to music, information, and more",
-                "Noise rejecting dual microphone system for clear sound and voice pick up",
-                "Balanced audio performance at any volume",
-                "Hassle free Bluetooth pairing, personalized settings, access to future updates, and more through the Bose Connect app",
-                "Bose AR enabled : an innovative, audio only version of augmented reality",
-                "Unlock Bose AR via a firmware update through the Bose Connect app",
-                "Bose AR availability and functionality varies. Bose AR enhanced apps are currently available for iPhone and iPad users only. Apps for Android devices are in development"
-            ],
-            "short-reviews": [],
-            "long-reviews": [
-                "I give it five stars. My wife hates them she would give it 1. I put them on and that\u2019s it. I can\u2019t hear her any more.",
-                "I purchased these and the Sony WH1000XM2 to compare the two. Cnet says they both have a \"9\" for sound quality. I would agree, they both sound excellent. The Bose won the test for its noise cancellation, performance talking to people on the phone, comfort on my head, and sound processing.Phone performance:I compared how the Bose and the Sony sounded when recording and playing back my voice with a fan running in the background. The Bose sounded like I was holding an old fashioned handset and talking in a quiet room - intimate and zero background noise. The Sony sounded like I was on speaker phone, and I could hear some background noise. (As a control I also recorded using neither and it sounded like I was on speaker but also I could hear more background noise.) This feature is important to me since I spend a lot of time on the phone and prefer my clients to not hear any background noise.Sound qualityThe Bose and Sony both have excellent sound quality for playing music. I personally prefer the sound the Sony produces. The Sony iphone app lets you choose your levels on an equalizer, and I like that. However, the Bose hears what type of music you're playing and automatically optimizes the sound, and it does a really good job. While I would prefer to be able to set the levels if I so choose, I also appreciate that Bose is making it all easy for me, so I can truly listen to my music on random and not have to fuss with levels. The Bose iphone app doesn't do very much at all. It does let you \"find your headset\" similar to the \"find my phone\" app, and it will apply firmware. (I'm hoping Bose will add an equalizer into its app in the future.)Noise cancellationThe Sony occasionally made me aware that noise cancellation was going on (with a whitenoise effect). The Bose on the other hand just stops the noise. There is no delay, no white noise, just quiet and your music.ControlsThe Bose controls are intuitive to find and to use. I like that the on-off control is a switch to flip on and off (rather than a button to find). Also, you can use this button to switch between devices, for example between your phone and ipad and your TV amplifier. The right earcup has three small buttons in a row together, and they control a lot of things. Volume, pause, and skip, rewind, answer/decline calls, etc. The left earcup only has the google assistant button, which I programmed to instead control the amount of noise cancellation (high, low, off). Song playback sounds much better with noise cancellation on high, and I don't think that has to do with noise (I was in a quiet environment); the bass sounds enhanced with noise cancellation on for some reason. (In comparison, the Sony lets you swipe the earcup itself to control volume, pause, play, skip, etc. This seems great in theory, but in practice if I bumped  the earcup adjusting my glasses or whatever, the music would pause. I found the Sony to be somewhat buggy in that regard. It would stop playing at times and I had to pick up my phone to get the music re-started, which is annoying.) I found the Bose controls to be more intuitive and consistent. Also, when you switch them on a voice tells you how much battery you have left, which is handy.ComfortThe Bose QuietComfort truly is comfortable. The earcups are soft, there is not a lot of clamping, and the top band is padded so it's less annoying on the top of the head.  (In comparison, the Sony do have more clamping which was uncomfortable over glasses.) I am a pilot and wear a similar headset, so I'm familiar with how headphones feel after a few hours. On-ear are not going to be as comfortable for long term wear as earbuds would be, but I was wiling to make that trade-off to get superior sound quality.StyleThe Bose are more streamlined to my head. the Sony are bulky and look geeky.ConclusionEven though the Sony produces superior sound, the litany of other features (superior noise cancellation, intuitive controls, comfort, style, & phone performance) won me over to the Bose.",
-                "These are amazing and Bose is great!  I purchased these headphones for their noise-cancellation abilities.  I am an application developer and wear them at work because I am easily distracted.  I don't even listen to music with them... they just cancel just about all background noise, including random chatter from the annoying marketing department.  I also use them for WebEx and Skype calls with clients.  The built-in microphone is great and the noise-cancellation is helpful during those calls as well.  Battery life is extremely good.  I can go an entire week without having to charge the headset.  It comes with an 1/8\" cable that will allow you to listen to music even when the batteries are dead.  An added feature is that the bluetooth feature will allow you to connect to and hear audio from two sources at the same time.  This is great if you want to connect to your iPhone and laptop at the same time.After a month of use, the headphones button would no longer work to pair to a new device.  It would still power on and off, just the pairing didn't function.  Bose support was difficult to deal with.  At first the support technician didn't think there was anything wrong with the headset.  After a frustrating conversation, he relented and sent me instructions for sending them back to the manufacturer.  This would mean that I would be without my precious headphones for at least two weeks.  The next day prior to dropping the headphones at UPS I came across The Bose Store at Tysons Corner Mall.  I had the headphones with me so I decided to speak to one of the employees there.  After a very brief conversation, and even though I purchased these through Amazon, he walks over to a display, gets me a brand new set of headphones and proceeds to exchange my defective ones for the new set.  No other questions asked.  He just said \"We like to take care of our customers\".  I wish customer support would have been as easy to deal with... but, things worked out.",
-                "I received these with firmware 2.0.1 which worked phenomenally with my Mac and iPhone. ANC was nice and bluetooth stable. Unfortunately, the google assistant app decided to update my firmware to 2.5.1 by it self!! Seriously Google? Ask me for permission first.Afterwards, ANC got noticeably worse. I played various background noise on my speakers and there was no difference between low and high ANC. Bluetooth skipped every 2 seconds if both Mac and iPhone were connected whereas it worked seamlessly before. Symptoms didn't go away after updating to the 3.1.8 firmware via Bose's website. These are getting returned.If you get these headphones, DO NOT update them - please. If it ain't broke don't fix it.Notes:-I did the Bose reset and re-paired multiple times. No dice.-This ANC issue happened on the original QC 35 too-google assistant initiated update WITHOUT prompting \"yes or no\". This happened when opening the app."
-            ]
-        }
-        #try:
-            #json = parse(url)
-        #except:
-            #json = parse('https://www.amazon.com/Doublju-Lightweight-Zip-Up-Hoodie-Jacket/dp/B01N67CJGX/ref=cm_cr_arp_d_product_top?ie=UTF8')
-        for review in json["long-reviews"]:
-            rating = 4
+        url = request.POST.get('url-input', None)
+        
+        # try:
+        #      json = parse(url)
+        # except:
+        #      json = parse('https://www.amazon.com/Doublju-Lightweight-Zip-Up-Hoodie-Jacket/dp/B01N67CJGX/ref=cm_cr_arp_d_product_top?ie=UTF8')
+
+        # json = {
+        #     "brand": "Bose",
+        #     "name": "Bose QuietComfort 35 II Wireless Bluetooth Headphones, Noise-Cancelling, with Alexa voice control, enabled with Bose AR - Silver",
+        #     "price": "$349.00",
+        #     "img-url": "https://images-na.ssl-images-amazon.com/images/I/41I0FkzD56L._SY300_QL70_.jpg",
+        #     "star-rating": "4.4 out of 5 stars",
+        #     "customer-reviews-count": "3,411 customer reviews",
+        #     "details": [
+        #         "3 levels of world class noise cancellation for better listening experience in any environment",
+        #         "Alexa enabled for voice access to music, information, and more",
+        #         "Noise rejecting dual microphone system for clear sound and voice pick up",
+        #         "Balanced audio performance at any volume",
+        #         "Hassle free Bluetooth pairing, personalized settings, access to future updates, and more through the Bose Connect app",
+        #         "Bose AR enabled : an innovative, audio only version of augmented reality",
+        #         "Unlock Bose AR via a firmware update through the Bose Connect app",
+        #         "Bose AR availability and functionality varies. Bose AR enhanced apps are currently available for iPhone and iPad users only. Apps for Android devices are in development"
+        #     ],
+        #     "short-reviews": [],
+        #     "long-reviews": [
+        #         "I give it five stars. My wife hates them she would give it 1. I put them on and that\u2019s it. I can\u2019t hear her any more.",
+        #         "I purchased these and the Sony WH1000XM2 to compare the two. Cnet says they both have a \"9\" for sound quality. I would agree, they both sound excellent. The Bose won the test for its noise cancellation, performance talking to people on the phone, comfort on my head, and sound processing.Phone performance:I compared how the Bose and the Sony sounded when recording and playing back my voice with a fan running in the background. The Bose sounded like I was holding an old fashioned handset and talking in a quiet room - intimate and zero background noise. The Sony sounded like I was on speaker phone, and I could hear some background noise. (As a control I also recorded using neither and it sounded like I was on speaker but also I could hear more background noise.) This feature is important to me since I spend a lot of time on the phone and prefer my clients to not hear any background noise.Sound qualityThe Bose and Sony both have excellent sound quality for playing music. I personally prefer the sound the Sony produces. The Sony iphone app lets you choose your levels on an equalizer, and I like that. However, the Bose hears what type of music you're playing and automatically optimizes the sound, and it does a really good job. While I would prefer to be able to set the levels if I so choose, I also appreciate that Bose is making it all easy for me, so I can truly listen to my music on random and not have to fuss with levels. The Bose iphone app doesn't do very much at all. It does let you \"find your headset\" similar to the \"find my phone\" app, and it will apply firmware. (I'm hoping Bose will add an equalizer into its app in the future.)Noise cancellationThe Sony occasionally made me aware that noise cancellation was going on (with a whitenoise effect). The Bose on the other hand just stops the noise. There is no delay, no white noise, just quiet and your music.ControlsThe Bose controls are intuitive to find and to use. I like that the on-off control is a switch to flip on and off (rather than a button to find). Also, you can use this button to switch between devices, for example between your phone and ipad and your TV amplifier. The right earcup has three small buttons in a row together, and they control a lot of things. Volume, pause, and skip, rewind, answer/decline calls, etc. The left earcup only has the google assistant button, which I programmed to instead control the amount of noise cancellation (high, low, off). Song playback sounds much better with noise cancellation on high, and I don't think that has to do with noise (I was in a quiet environment); the bass sounds enhanced with noise cancellation on for some reason. (In comparison, the Sony lets you swipe the earcup itself to control volume, pause, play, skip, etc. This seems great in theory, but in practice if I bumped  the earcup adjusting my glasses or whatever, the music would pause. I found the Sony to be somewhat buggy in that regard. It would stop playing at times and I had to pick up my phone to get the music re-started, which is annoying.) I found the Bose controls to be more intuitive and consistent. Also, when you switch them on a voice tells you how much battery you have left, which is handy.ComfortThe Bose QuietComfort truly is comfortable. The earcups are soft, there is not a lot of clamping, and the top band is padded so it's less annoying on the top of the head.  (In comparison, the Sony do have more clamping which was uncomfortable over glasses.) I am a pilot and wear a similar headset, so I'm familiar with how headphones feel after a few hours. On-ear are not going to be as comfortable for long term wear as earbuds would be, but I was wiling to make that trade-off to get superior sound quality.StyleThe Bose are more streamlined to my head. the Sony are bulky and look geeky.ConclusionEven though the Sony produces superior sound, the litany of other features (superior noise cancellation, intuitive controls, comfort, style, & phone performance) won me over to the Bose.",
+        #         "These are amazing and Bose is great!  I purchased these headphones for their noise-cancellation abilities.  I am an application developer and wear them at work because I am easily distracted.  I don't even listen to music with them... they just cancel just about all background noise, including random chatter from the annoying marketing department.  I also use them for WebEx and Skype calls with clients.  The built-in microphone is great and the noise-cancellation is helpful during those calls as well.  Battery life is extremely good.  I can go an entire week without having to charge the headset.  It comes with an 1/8\" cable that will allow you to listen to music even when the batteries are dead.  An added feature is that the bluetooth feature will allow you to connect to and hear audio from two sources at the same time.  This is great if you want to connect to your iPhone and laptop at the same time.After a month of use, the headphones button would no longer work to pair to a new device.  It would still power on and off, just the pairing didn't function.  Bose support was difficult to deal with.  At first the support technician didn't think there was anything wrong with the headset.  After a frustrating conversation, he relented and sent me instructions for sending them back to the manufacturer.  This would mean that I would be without my precious headphones for at least two weeks.  The next day prior to dropping the headphones at UPS I came across The Bose Store at Tysons Corner Mall.  I had the headphones with me so I decided to speak to one of the employees there.  After a very brief conversation, and even though I purchased these through Amazon, he walks over to a display, gets me a brand new set of headphones and proceeds to exchange my defective ones for the new set.  No other questions asked.  He just said \"We like to take care of our customers\".  I wish customer support would have been as easy to deal with... but, things worked out.",
+        #         "I received these with firmware 2.0.1 which worked phenomenally with my Mac and iPhone. ANC was nice and bluetooth stable. Unfortunately, the google assistant app decided to update my firmware to 2.5.1 by it self!! Seriously Google? Ask me for permission first.Afterwards, ANC got noticeably worse. I played various background noise on my speakers and there was no difference between low and high ANC. Bluetooth skipped every 2 seconds if both Mac and iPhone were connected whereas it worked seamlessly before. Symptoms didn't go away after updating to the 3.1.8 firmware via Bose's website. These are getting returned.If you get these headphones, DO NOT update them - please. If it ain't broke don't fix it.Notes:-I did the Bose reset and re-paired multiple times. No dice.-This ANC issue happened on the original QC 35 too-google assistant initiated update WITHOUT prompting \"yes or no\". This happened when opening the app."
+        #     ]
+        # }
+        try:
+            tup = parse2(url)
+        except:
+            tup = ([],[])
+
+        for rating,review in zip(tup[0],tup[1]):
+        #for review in json["long-reviews"]:
+            #rating = 3
             if (real_time_predict([review])[0]==0):
                 reviews_real.append({
                         'author': 'CoreyMS',
-                        'title': 'Review Title',
                         'content': review,
                         'date_posted': 'August 27, 2018',
                         'rating': rating
@@ -611,16 +494,21 @@ def home(request):
             else:
                 reviews_fake.append({
                         'author': 'CoreyMS',
-                        'title': 'Review Title',
                         'content': review,
                         'date_posted': 'August 27, 2018',
                         'rating': rating
                     })
-        product = json['name']
-
-    rate = 0
+        # if ('name' in json):
+        #     product = json['name']
+    
+    percs = [0,0,0,0,0]
     if count != 0:
-        rate = rating_sum/count
+        rate = round(rating_sum/count, 2)
+        percs[0] = round(count1star/count, 2)
+        percs[1] = round(count2star/count, 2)
+        percs[2] = round(count3star/count, 2)
+        percs[3] = round(count4star/count, 2)
+        percs[4] = round(count5star/count, 2)
 
     context = {
         'reviews_real': reviews_real,
@@ -633,6 +521,7 @@ def home(request):
         'count3star': count3star,
         'count2star': count2star,
         'count1star': count1star,
+        'percs': percs,
     }
     return render(request, 'slayer/home.html', context)
 
