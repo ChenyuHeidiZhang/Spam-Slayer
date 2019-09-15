@@ -49,7 +49,7 @@
 
     <main role="main" class="container">
       <div id="product-title" class="container">
-        <h2>Amazon product title</h2>
+        <h2>{{ product }}</h2>
       </div>
 
       <div class="row">
@@ -75,7 +75,7 @@
                       <a class="mr-2" href="#">{{ review.author }}</a>
                       <small class="text-muted">{{ review.date_posted }}</small>
                     </div>
-                    <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
+                    <h3><a class="article-title" href="#">{{ review.title }}</a></h3>
                     <p class="article-content">{{ review.content }}</p>
                   {% endfor %}
                   </div>
