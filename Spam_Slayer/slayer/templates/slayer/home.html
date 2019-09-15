@@ -70,10 +70,11 @@
                 <!-- Tab panes -->
                 <div class="media-body tab-content">
                   <div class="tab-pane container active" id="real">
-                  {% for review in reviews %}
+                  {% for review in reviews_real %}
                     <div class="article-metadata">
                       <a class="mr-2" href="#">{{ review.author }}</a>
                       <small class="text-muted">{{ review.date_posted }}</small>
+                      <p>{{ review.rating }} out of 5</p>
                     </div>
                     <h3><a class="article-title" href="#">{{ review.title }}</a></h3>
                     <p class="article-content">{{ review.content }}</p>
@@ -81,10 +82,11 @@
                   </div>
 
                   <div class="tab-pane container fade" id="fake">
-                    {% for review in reviews %}
+                    {% for review in reviews_fake %}
                     <div class="article-metadata">
-                      <a class="mr-2" href="#">{{ review.author2 }}</a>
+                      <a class="mr-2" href="#">{{ review.author }}</a>
                       <small class="text-muted">{{ review.date_posted }}</small>
+                      <p>{{ review.rating }}</p>
                     </div>
                     <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
                     <p class="article-content">{{ review.content }}</p>

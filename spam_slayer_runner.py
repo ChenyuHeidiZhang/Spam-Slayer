@@ -457,3 +457,4 @@ def real_time_predict(list_of_reviews):
     data = get_preprocessed_data(list_of_reviews)
     logits, prediction = predict(data)
     return prediction;
+
