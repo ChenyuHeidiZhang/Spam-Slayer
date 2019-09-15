@@ -455,7 +455,8 @@ def real_time_predict(list_of_reviews):
 
 
 def parse(url):
-    import urllib.request
+    #import urllib.request
+    import requests
     import urllib.parse
     import urllib.error
     from bs4 import BeautifulSoup
@@ -467,8 +468,10 @@ def parse(url):
     ctx.verify_mode = ssl.CERT_NONE
 
     # url=input("Enter Amazon Product Url- ")
-    html = urllib.request.urlopen(url, context=ctx).read()
-    soup = BeautifulSoup(html, 'html.parser')
+    #html = urllib.request.urlopen(url, context=ctx).read()
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    page = requests.get(url, headers=headers)
+    soup = BeautifulSoup(page.text, 'html.parser')
     html = soup.prettify('utf-8')
     product_json = {}
 
@@ -541,8 +544,13 @@ def home(request):
     reviews_fake = []
     product = "Amazon Product"
 
-    count = 0
+    count = 1
     rating_sum = 0
+    count5star = 0
+    count4star = 0
+    count3star = 0
+    count2star = 0
+    count1star = 0
 
     if (request.method == 'POST'): 
         url = request.POST.get('url-input', None)
@@ -551,33 +559,49 @@ def home(request):
         except:
             json = parse('https://www.amazon.com/Doublju-Lightweight-Zip-Up-Hoodie-Jacket/dp/B01N67CJGX/ref=cm_cr_arp_d_product_top?ie=UTF8')
         for review in json["long-reviews"]:
+            rating = 4
             if (real_time_predict([review])[0]==0):
                 reviews_real.append({
                         'author': 'CoreyMS',
                         'title': 'Review Title',
                         'content': review,
                         'date_posted': 'August 27, 2018',
-                        'rating': '4'
+                        'rating': rating
                     })
                 rating_sum = rating_sum + 4
                 count = count + 1
+                if rating==1:
+                    count1star = count1star + 1
+                if rating==2:
+                    count2star = count2star + 1
+                if rating==3:
+                    count3star = count3star + 1
+                if rating==4:
+                    count4star = count4star + 1
+                if rating==5:
+                    count5star = count5star + 1
             else:
                 reviews_fake.append({
                         'author': 'CoreyMS',
                         'title': 'Review Title',
                         'content': review,
                         'date_posted': 'August 27, 2018',
-                        'rating': '4'
+                        'rating': rating
                     })
 
-        product = json['name']
+        #product = json['name']
 
     context = {
         'reviews_real': reviews_real,
         'reviews_fake': reviews_fake,
         'product': product,
-        'rating_sum': rating_sum,
-        'count': count
+        'rating': rating_sum/count,
+        'count': count,
+        'count5star': count5star,
+        'count4star': count4star,
+        'count3star': count3star,
+        'count2star': count2star,
+        'count1star': count1star
     }
     return render(request, 'slayer/home.html', context)
 
