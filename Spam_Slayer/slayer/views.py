@@ -339,16 +339,16 @@ def parse2(url):
     import os
     import pandas as pd
 
-    #url = 'https://www.amazon.in/Apple-MacBook-Air-13-3-inch-MQD32HN/product-reviews/B073Q5R6VR/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&pageNumber='
-    # with open('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews.py', 'w') as new_file:
-    #     with open('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews_old.py') as old_file:
-    #         for n, line in enumerate(old_file):
-    #           if n == 15:
-    #             new_file.write(line[:line.index('=')+2] + '"' + url + '&pageNumber=' + '"')
-    #           elif n >= 2:
-    #             new_file.write(line)
+    url = 'https://www.amazon.in/Apple-MacBook-Air-13-3-inch-MQD32HN/product-reviews/B073Q5R6VR/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&pageNumber='
+    with open('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews.py', 'w') as new_file:
+        with open('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews_old.py') as old_file:
+            for n, line in enumerate(old_file):
+              if n == 15:
+                new_file.write(line[:line.index('=')+2] + '"' + url + '&pageNumber=' + '"')
+              elif n >= 2:
+                new_file.write(line)
 
-    # os.system("scrapy runspider /Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews.py -o /Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/reviews.csv")
+    os.system("scrapy runspider /Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews.py -o /Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/reviews.csv")
     data = pd.read_csv('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/reviews.csv')
     rating = []
     review = []
@@ -434,10 +434,10 @@ def home(request):
     if (request.method == 'POST'): 
         url = request.POST.get('url-input', None)
         
-        # try:
-        #      json = parse(url)
-        # except:
-        #      json = parse('https://www.amazon.com/Doublju-Lightweight-Zip-Up-Hoodie-Jacket/dp/B01N67CJGX/ref=cm_cr_arp_d_product_top?ie=UTF8')
+        try:
+             json = parse(url)
+        except:
+             json = parse('https://www.amazon.com/Doublju-Lightweight-Zip-Up-Hoodie-Jacket/dp/B01N67CJGX/ref=cm_cr_arp_d_product_top?ie=UTF8')
 
         # json = {
         #     "brand": "Bose",
@@ -498,8 +498,8 @@ def home(request):
                         'date_posted': 'August 27, 2018',
                         'rating': rating
                     })
-        # if ('name' in json):
-        #     product = json['name']
+        if ('name' in json):
+            product = json['name']
     
     percs = [0,0,0,0,0]
     if count != 0:
