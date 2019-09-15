@@ -181,15 +181,15 @@ NUM_CHECKPOINTS = 5    # Keep only the 5 most recents checkpoints
 LEARNING_RATE = 1e-3   # The learning rate
 
 # Load vocabulary and the word2vec model
-pickle_file = '/content/Spam-Slayer/Data/save.pickle'
+pickle_file = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/save.pickle'
 with open(pickle_file, 'rb') as f :
     save = pickle.load(f)
     wordsVectors = save['wordsVectors']
     vocabulary = save['vocabulary']
     del save  # hint to help gc free up memory
-print('Vocabulary and the word2vec loaded')
-print('Vocabulary size is ', len(vocabulary))
-print('Word2Vec model shape is ', wordsVectors.shape)
+# print('Vocabulary and the word2vec loaded')
+# print('Vocabulary size is ', len(vocabulary))
+# print('Word2Vec model shape is ', wordsVectors.shape)
 
 def batch_iter(data, batch_size, num_epochs, shuffle=True):
     """
@@ -215,7 +215,7 @@ def train():
     '''Training the model'''
 
     #Load training data, training labels, validation data, validation labels
-    pickle_file = '/content/Spam-Slayer/Data/data_saved.pickle'
+    pickle_file = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/data_saved.pickle'
     with open(pickle_file, 'rb') as f :
         save = pickle.load(f)
         train_data = save['train_data']
@@ -251,7 +251,7 @@ def train():
             
             # Output directory for models and summaries
             timestamp = str(int(time.time()))
-            out_dir = os.path.abspath(os.path.join("/content/Spam-Slayer/Data/runs", timestamp))
+            out_dir = os.path.abspath(os.path.join("/Users/chenyuzhang/desktop/Spam-Slayer/Data/runs", timestamp))
             print("Writing to {}\n".format(out_dir))
             
             # Summaries for loss and accuracy
@@ -334,8 +334,6 @@ def train():
                     path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                     print("Saved model checkpoint to {}\n".format(path))
 
-train()
-!zip -r "./runs" .
 
 def predict(x_batch):
     '''Making a prediction'''
@@ -355,7 +353,7 @@ def predict(x_batch):
                             training=False)
             
             saver = tf.train.Saver()
-            saver.restore(sess, "/content/Spam-Slayer/Data/runs/1568480280/checkpoints/model-900")                     
+            saver.restore(sess, "/Users/chenyuzhang/desktop/Spam-Slayer/Data/runs/model-900")                     
             
             def get_logits_predictions(x_batch):
                 """
@@ -399,6 +397,7 @@ def handle_reviews(single_review):
 
 MAX_SEQ_LENGTH = 160
 def convert_string_to_index_array(single_review):
+
     doc = np.zeros(MAX_SEQ_LENGTH, dtype='int32')
     indexCounter = 0
     words,_ = handle_reviews(single_review)
@@ -406,14 +405,13 @@ def convert_string_to_index_array(single_review):
         try:
             doc[indexCounter] = vocabulary.index(word) # What if word is not found in vocabulary? 
         except:
-            doc[indexCounter] = np.random
+            doc[indexCounter] = 0
         indexCounter = indexCounter + 1
         if (indexCounter >= MAX_SEQ_LENGTH):
             break
     return doc
 
 def get_preprocessed_data(list_of_reviews):
-
     total_reviews = len(list_of_reviews)
     idsMatrix = np.ndarray(shape=(total_reviews, MAX_SEQ_LENGTH), dtype='int32')
 
@@ -424,35 +422,36 @@ def get_preprocessed_data(list_of_reviews):
 
     return idsMatrix
 
-# Test giving string inputs
-def get_list_of_string(path):
+def real_time_predict_tester():
+    # Test giving string inputs
+    def get_list_of_string(path):
+        list_of_reviews = []
+        files = os.listdir(path)
+        for name in files:
+            full_path = os.path.join(path,name)
+            # Open a file: file
+            file = open(full_path,mode='r') 
+            list_of_reviews.append(file.read())   
+            # close the file
+            file.close()
+        return list_of_reviews
+
+    root_path = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/op_spam_v1.4/positive_polarity/truthful_from_TripAdvisor/fold'
     list_of_reviews = []
-    files = os.listdir(path)
-    for name in files:
-        full_path = os.path.join(path,name)
-        # Open a file: file
-        file = open(full_path,mode='r') 
-        list_of_reviews.append(file.read())   
-        # close the file
-        file.close()
-    return list_of_reviews
+    for i in range(1, 6):
+        path = root_path + str(i)
+        list_of_reviews = list_of_reviews + get_list_of_string(path)
 
-root_path = '/content/Spam-Slayer/Data/op_spam_v1.4/positive_polarity/truthful_from_TripAdvisor/fold'
-list_of_reviews = []
-for i in range(1, 6):
-    path = root_path + str(i)
-    list_of_reviews = list_of_reviews + get_list_of_string(path)
+    data = get_preprocessed_data(list_of_reviews)
 
-data = get_preprocessed_data(list_of_reviews)
+    logits, prediction = predict(data)
 
-logits, prediction = predict(data)
+    # print("logits:\n", logits)
+    print("\n\npredictions:\n", prediction)
 
-# print("logits:\n", logits)
-print("\n\npredictions:\n", prediction)
-
-l = len(prediction)
-right = l - np.sum(prediction)
-print("accuracy", right/l)
+    l = len(prediction)
+    right = l - np.sum(prediction)
+    print("accuracy", right/l)
 
 def real_time_predict(list_of_reviews):
     data = get_preprocessed_data(list_of_reviews)
