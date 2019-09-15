@@ -16,6 +16,8 @@ import scipy.stats as stats
 
 from django.shortcuts import render
 
+ROOT = '/Users/chenyuzhang/desktop'
+
 class SCNN_MODEL(object):
     '''
         A SCNN model for Deceptive spam reviews detection. 
@@ -175,7 +177,7 @@ NUM_CHECKPOINTS = 5    # Keep only the 5 most recents checkpoints
 LEARNING_RATE = 1e-3   # The learning rate
 
 # Load vocabulary and the word2vec model
-pickle_file = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/save.pickle'
+pickle_file = ROOT+'/Spam-Slayer/Data/Kaggle Amazon Data/save.pickle'
 with open(pickle_file, 'rb') as f :
     save = pickle.load(f)
     wordsVectors = save['wordsVectors']
@@ -209,7 +211,7 @@ def train():
     '''Training the model'''
 
     #Load training data, training labels, validation data, validation labels
-    pickle_file = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/data_saved.pickle'
+    pickle_file = ROOT+'/Spam-Slayer/Data/Kaggle Amazon Data/data_saved.pickle'
     with open(pickle_file, 'rb') as f :
         save = pickle.load(f)
         train_data = save['train_data']
@@ -245,7 +247,7 @@ def train():
             
             # Output directory for models and summaries
             timestamp = str(int(time.time()))
-            out_dir = os.path.abspath(os.path.join("/Users/chenyuzhang/desktop/Spam-Slayer/Data/runs", timestamp))
+            out_dir = os.path.abspath(os.path.join(ROOT+"/Spam-Slayer/Data/Kaggle Amazon Data/runs/", timestamp))
             print("Writing to {}\n".format(out_dir))
             
             # Summaries for loss and accuracy
@@ -347,7 +349,7 @@ def predict(x_batch):
                             training=False)
             
             saver = tf.train.Saver()
-            saver.restore(sess, "/Users/chenyuzhang/desktop/Spam-Slayer/Data/runs/model-900")                     
+            saver.restore(sess, ROOT+"/Spam-Slayer/Data/Kaggle Amazon Data/runs/model-14400")                     
             
             def get_logits_predictions(x_batch):
                 """
@@ -430,7 +432,7 @@ def real_time_predict_tester():
             file.close()
         return list_of_reviews
 
-    root_path = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/op_spam_v1.4/positive_polarity/truthful_from_TripAdvisor/fold'
+    root_path = ROOT+'/Spam-Slayer/Data/Gold Standard Data/op_spam_v1.4/positive_polarity/truthful_from_TripAdvisor/fold'
     list_of_reviews = []
     for i in range(1, 6):
         path = root_path + str(i)
