@@ -181,7 +181,7 @@ NUM_CHECKPOINTS = 5    # Keep only the 5 most recents checkpoints
 LEARNING_RATE = 1e-3   # The learning rate
 
 # Load vocabulary and the word2vec model
-pickle_file = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/save.pickle'
+pickle_file = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/Kaggle Amazon Data/save.pickle'
 with open(pickle_file, 'rb') as f :
     save = pickle.load(f)
     wordsVectors = save['wordsVectors']
@@ -215,7 +215,7 @@ def train():
     '''Training the model'''
 
     #Load training data, training labels, validation data, validation labels
-    pickle_file = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/data_saved.pickle'
+    pickle_file = '/Users/chenyuzhang/desktop/Spam-Slayer/Data/Kaggle Amazon Data/data_saved.pickle'
     with open(pickle_file, 'rb') as f :
         save = pickle.load(f)
         train_data = save['train_data']
@@ -251,7 +251,7 @@ def train():
             
             # Output directory for models and summaries
             timestamp = str(int(time.time()))
-            out_dir = os.path.abspath(os.path.join("/Users/chenyuzhang/desktop/Spam-Slayer/Data/runs", timestamp))
+            out_dir = os.path.abspath(os.path.join("/Users/chenyuzhang/desktop/Spam-Slayer/Data/Kaggle Amazon Data/runs", timestamp))
             print("Writing to {}\n".format(out_dir))
             
             # Summaries for loss and accuracy
@@ -353,7 +353,7 @@ def predict(x_batch):
                             training=False)
             
             saver = tf.train.Saver()
-            saver.restore(sess, "/Users/chenyuzhang/desktop/Spam-Slayer/Data/runs/model-900")                     
+            saver.restore(sess, "/Users/chenyuzhang/desktop/Spam-Slayer/Data/Kaggle Amazon Data/runs/model-14400")                     
             
             def get_logits_predictions(x_batch):
                 """
