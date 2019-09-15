@@ -11,7 +11,7 @@ class AmazonReviewsSpider(scrapy.Spider):
     allowed_domains = ['amazon.in']
     
     # Base URL for the MacBook air reviews
-    myBaseUrl = "https://www.amazon.in/Apple-MacBook-Air-13-3-inch-MQD32HN/product-reviews/B073Q5R6VR/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&pageNumber=&pageNumber="
+    myBaseUrl = "https://www.amazon.com/EverShred-12-Sheet-High-Security-Micro-Cut-Operation/product-reviews/B00IOFD0VO/ref=cm_cr_dp_d_show_all_top?ie=UTF8&reviewerType=all_reviews&pageNumber="
     start_urls = []
    
     # Creating list of urls to be scraped by appending page number a the end of base url

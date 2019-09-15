@@ -339,7 +339,7 @@ def parse2(url):
     import os
     import pandas as pd
 
-    url = 'https://www.amazon.in/Apple-MacBook-Air-13-3-inch-MQD32HN/product-reviews/B073Q5R6VR/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&pageNumber='
+    #url = 'https://www.amazon.in/Apple-MacBook-Air-13-3-inch-MQD32HN/product-reviews/B073Q5R6VR/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&pageNumber='
     with open('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews.py', 'w') as new_file:
         with open('/Users/chenyuzhang/desktop/Spam-Slayer/Spam_Slayer/slayer/amazon_reviews_old.py') as old_file:
             for n, line in enumerate(old_file):
