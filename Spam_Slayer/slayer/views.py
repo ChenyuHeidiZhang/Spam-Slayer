@@ -468,10 +468,11 @@ def parse(url):
     ctx.verify_mode = ssl.CERT_NONE
 
     # url=input("Enter Amazon Product Url- ")
-    #html = urllib.request.urlopen(url, context=ctx).read()
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    page = requests.get(url, headers=headers)
-    soup = BeautifulSoup(page.text, 'html.parser')
+    html = urllib.request.urlopen(url, context=ctx).read()
+    soup = BeautifulSoup(html, 'html.parser')
+    #headers = {'User-Agent': 'Mozilla/5.0'}
+    #page = requests.get(url, headers=headers)
+    #soup = BeautifulSoup(page.text, 'html.parser')
     html = soup.prettify('utf-8')
     product_json = {}
 
@@ -544,7 +545,7 @@ def home(request):
     reviews_fake = []
     product = "Amazon Product"
 
-    count = 1
+    count = 0
     rating_sum = 0
     count5star = 0
     count4star = 0
@@ -553,11 +554,36 @@ def home(request):
     count1star = 0
 
     if (request.method == 'POST'): 
-        url = request.POST.get('url-input', None)
-        try:
-            json = parse(url)
-        except:
-            json = parse('https://www.amazon.com/Doublju-Lightweight-Zip-Up-Hoodie-Jacket/dp/B01N67CJGX/ref=cm_cr_arp_d_product_top?ie=UTF8')
+        #url = request.POST.get('url-input', None)
+        json = {
+            "brand": "Bose",
+            "name": "Bose QuietComfort 35 II Wireless Bluetooth Headphones, Noise-Cancelling, with Alexa voice control, enabled with Bose AR - Silver",
+            "price": "$349.00",
+            "img-url": "https://images-na.ssl-images-amazon.com/images/I/41I0FkzD56L._SY300_QL70_.jpg",
+            "star-rating": "4.4 out of 5 stars",
+            "customer-reviews-count": "3,411 customer reviews",
+            "details": [
+                "3 levels of world class noise cancellation for better listening experience in any environment",
+                "Alexa enabled for voice access to music, information, and more",
+                "Noise rejecting dual microphone system for clear sound and voice pick up",
+                "Balanced audio performance at any volume",
+                "Hassle free Bluetooth pairing, personalized settings, access to future updates, and more through the Bose Connect app",
+                "Bose AR enabled : an innovative, audio only version of augmented reality",
+                "Unlock Bose AR via a firmware update through the Bose Connect app",
+                "Bose AR availability and functionality varies. Bose AR enhanced apps are currently available for iPhone and iPad users only. Apps for Android devices are in development"
+            ],
+            "short-reviews": [],
+            "long-reviews": [
+                "I give it five stars. My wife hates them she would give it 1. I put them on and that\u2019s it. I can\u2019t hear her any more.",
+                "I purchased these and the Sony WH1000XM2 to compare the two. Cnet says they both have a \"9\" for sound quality. I would agree, they both sound excellent. The Bose won the test for its noise cancellation, performance talking to people on the phone, comfort on my head, and sound processing.Phone performance:I compared how the Bose and the Sony sounded when recording and playing back my voice with a fan running in the background. The Bose sounded like I was holding an old fashioned handset and talking in a quiet room - intimate and zero background noise. The Sony sounded like I was on speaker phone, and I could hear some background noise. (As a control I also recorded using neither and it sounded like I was on speaker but also I could hear more background noise.) This feature is important to me since I spend a lot of time on the phone and prefer my clients to not hear any background noise.Sound qualityThe Bose and Sony both have excellent sound quality for playing music. I personally prefer the sound the Sony produces. The Sony iphone app lets you choose your levels on an equalizer, and I like that. However, the Bose hears what type of music you're playing and automatically optimizes the sound, and it does a really good job. While I would prefer to be able to set the levels if I so choose, I also appreciate that Bose is making it all easy for me, so I can truly listen to my music on random and not have to fuss with levels. The Bose iphone app doesn't do very much at all. It does let you \"find your headset\" similar to the \"find my phone\" app, and it will apply firmware. (I'm hoping Bose will add an equalizer into its app in the future.)Noise cancellationThe Sony occasionally made me aware that noise cancellation was going on (with a whitenoise effect). The Bose on the other hand just stops the noise. There is no delay, no white noise, just quiet and your music.ControlsThe Bose controls are intuitive to find and to use. I like that the on-off control is a switch to flip on and off (rather than a button to find). Also, you can use this button to switch between devices, for example between your phone and ipad and your TV amplifier. The right earcup has three small buttons in a row together, and they control a lot of things. Volume, pause, and skip, rewind, answer/decline calls, etc. The left earcup only has the google assistant button, which I programmed to instead control the amount of noise cancellation (high, low, off). Song playback sounds much better with noise cancellation on high, and I don't think that has to do with noise (I was in a quiet environment); the bass sounds enhanced with noise cancellation on for some reason. (In comparison, the Sony lets you swipe the earcup itself to control volume, pause, play, skip, etc. This seems great in theory, but in practice if I bumped  the earcup adjusting my glasses or whatever, the music would pause. I found the Sony to be somewhat buggy in that regard. It would stop playing at times and I had to pick up my phone to get the music re-started, which is annoying.) I found the Bose controls to be more intuitive and consistent. Also, when you switch them on a voice tells you how much battery you have left, which is handy.ComfortThe Bose QuietComfort truly is comfortable. The earcups are soft, there is not a lot of clamping, and the top band is padded so it's less annoying on the top of the head.  (In comparison, the Sony do have more clamping which was uncomfortable over glasses.) I am a pilot and wear a similar headset, so I'm familiar with how headphones feel after a few hours. On-ear are not going to be as comfortable for long term wear as earbuds would be, but I was wiling to make that trade-off to get superior sound quality.StyleThe Bose are more streamlined to my head. the Sony are bulky and look geeky.ConclusionEven though the Sony produces superior sound, the litany of other features (superior noise cancellation, intuitive controls, comfort, style, & phone performance) won me over to the Bose.",
+                "These are amazing and Bose is great!  I purchased these headphones for their noise-cancellation abilities.  I am an application developer and wear them at work because I am easily distracted.  I don't even listen to music with them... they just cancel just about all background noise, including random chatter from the annoying marketing department.  I also use them for WebEx and Skype calls with clients.  The built-in microphone is great and the noise-cancellation is helpful during those calls as well.  Battery life is extremely good.  I can go an entire week without having to charge the headset.  It comes with an 1/8\" cable that will allow you to listen to music even when the batteries are dead.  An added feature is that the bluetooth feature will allow you to connect to and hear audio from two sources at the same time.  This is great if you want to connect to your iPhone and laptop at the same time.After a month of use, the headphones button would no longer work to pair to a new device.  It would still power on and off, just the pairing didn't function.  Bose support was difficult to deal with.  At first the support technician didn't think there was anything wrong with the headset.  After a frustrating conversation, he relented and sent me instructions for sending them back to the manufacturer.  This would mean that I would be without my precious headphones for at least two weeks.  The next day prior to dropping the headphones at UPS I came across The Bose Store at Tysons Corner Mall.  I had the headphones with me so I decided to speak to one of the employees there.  After a very brief conversation, and even though I purchased these through Amazon, he walks over to a display, gets me a brand new set of headphones and proceeds to exchange my defective ones for the new set.  No other questions asked.  He just said \"We like to take care of our customers\".  I wish customer support would have been as easy to deal with... but, things worked out.",
+                "I received these with firmware 2.0.1 which worked phenomenally with my Mac and iPhone. ANC was nice and bluetooth stable. Unfortunately, the google assistant app decided to update my firmware to 2.5.1 by it self!! Seriously Google? Ask me for permission first.Afterwards, ANC got noticeably worse. I played various background noise on my speakers and there was no difference between low and high ANC. Bluetooth skipped every 2 seconds if both Mac and iPhone were connected whereas it worked seamlessly before. Symptoms didn't go away after updating to the 3.1.8 firmware via Bose's website. These are getting returned.If you get these headphones, DO NOT update them - please. If it ain't broke don't fix it.Notes:-I did the Bose reset and re-paired multiple times. No dice.-This ANC issue happened on the original QC 35 too-google assistant initiated update WITHOUT prompting \"yes or no\". This happened when opening the app."
+            ]
+        }
+        #try:
+            #json = parse(url)
+        #except:
+            #json = parse('https://www.amazon.com/Doublju-Lightweight-Zip-Up-Hoodie-Jacket/dp/B01N67CJGX/ref=cm_cr_arp_d_product_top?ie=UTF8')
         for review in json["long-reviews"]:
             rating = 4
             if (real_time_predict([review])[0]==0):
@@ -568,7 +594,7 @@ def home(request):
                         'date_posted': 'August 27, 2018',
                         'rating': rating
                     })
-                rating_sum = rating_sum + 4
+                rating_sum = rating_sum + rating
                 count = count + 1
                 if rating==1:
                     count1star = count1star + 1
@@ -588,20 +614,23 @@ def home(request):
                         'date_posted': 'August 27, 2018',
                         'rating': rating
                     })
+        product = json['name']
 
-        #product = json['name']
+    rate = 0
+    if count != 0:
+        rate = rating_sum/count
 
     context = {
         'reviews_real': reviews_real,
         'reviews_fake': reviews_fake,
         'product': product,
-        'rating': rating_sum/count,
+        'rating': rate,
         'count': count,
         'count5star': count5star,
         'count4star': count4star,
         'count3star': count3star,
         'count2star': count2star,
-        'count1star': count1star
+        'count1star': count1star,
     }
     return render(request, 'slayer/home.html', context)
 

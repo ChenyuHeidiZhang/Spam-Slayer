@@ -74,7 +74,7 @@
                     <div class="article-metadata">
                       <a class="mr-2" href="#">{{ review.author }}</a>
                       <small class="text-muted">{{ review.date_posted }}</small>
-                      <p>{{ review.rating }} out of 5</p>
+                      <a>Rating: {{ review.rating }} out of 5</a>
                     </div>
                     <h3><a class="article-title" href="#">{{ review.title }}</a></h3>
                     <p class="article-content">{{ review.content }}</p>
@@ -86,7 +86,7 @@
                     <div class="article-metadata">
                       <a class="mr-2" href="#">{{ review.author }}</a>
                       <small class="text-muted">{{ review.date_posted }}</small>
-                      <p>{{ review.rating }}</p>
+                      <a>Rating: {{ review.rating }} out of 5</a>
                     </div>
                     <h2><a class="article-title" href="#">{{ review.title }}</a></h2>
                     <p class="article-content">{{ review.content }}</p>
@@ -114,55 +114,55 @@
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-5" style="width: 40% "></div>
+                  <div class="bar-5" style="width: {{ count5star }} "></div>
                 </div>
               </div>
               <div class="side right">
-                <div>150</div>
+                <div>{{ count5star }}</div>
               </div>
               <div class="side">
                 <div>4 star</div>
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-4" style="width: 60%"></div>
+                  <div class="bar-4" style="width: {{ count4star }}"></div>
                 </div>
               </div>
               <div class="side right">
-                <div>63</div>
+                <div>{{ count4star }}</div>
               </div>
               <div class="side">
                 <div>3 star</div>
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-3"></div>
+                  <div class="bar-3" style="width: {{ count3star }}"></div>
                 </div>
               </div>
               <div class="side right">
-                <div>15</div>
+                <div>{{ count3star }}</div>
               </div>
               <div class="side">
                 <div>2 star</div>
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-2"></div>
+                  <div class="bar-2" style="width: {{ count3star }}"></div>
                 </div>
               </div>
               <div class="side right">
-                <div>6</div>
+                <div>{{ count2star }}</div>
               </div>
               <div class="side">
                 <div>1 star</div>
               </div>
               <div class="middle">
                 <div class="bar-container">
-                  <div class="bar-1"></div>
+                  <div class="bar-1" style="width: {{ count1star }}"></div>
                 </div>
               </div>
               <div class="side right">
-                <div>20</div>
+                <div>{{ count1star }}</div>
               </div>
             </div>
           </div>
